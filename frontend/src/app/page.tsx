@@ -148,19 +148,19 @@ export default function Home() {
 
       {/* Footer */}
       <footer className="bg-gray-900 py-8">
-        <div class="container mx-auto px-6">
-          <div class="flex flex-col md:flex-row justify-between items-center">
-            <div class="mb-4 md:mb-0">
-              <h3 class="text-xl font-bold">AtlasEye</h3>
-              <p class="text-gray-400">Satellite Change Detection Platform</p>
+        <div className="container mx-auto px-6">
+          <div className="flex flex-col md:flex-row justify-between items-center">
+            <div className="mb-4 md:mb-0">
+              <h3 className="text-xl font-bold">AtlasEye</h3>
+              <p className="text-gray-400">Satellite Change Detection Platform</p>
             </div>
-            <div class="flex space-x-4">
-              <a href="/about" class="text-gray-400 hover:text-white">About</a>
-              <a href="/contact" class="text-gray-400 hover:text-white">Contact</a>
-              <a href="/privacy" class="text-gray-400 hover:text-white">Privacy</a>
+            <div className="flex space-x-4">
+              <a href="/about" className="text-gray-400 hover:text-white">About</a>
+              <a href="/contact" className="text-gray-400 hover:text-white">Contact</a>
+              <a href="/privacy" className="text-gray-400 hover:text-white">Privacy</a>
             </div>
           </div>
-          <div class="mt-8 text-center text-gray-500 text-sm">
+          <div className="mt-8 text-center text-gray-500 text-sm">
             &copy; {new Date().getFullYear()} AtlasEye. All rights reserved.
           </div>
         </div>
