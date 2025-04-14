@@ -1,0 +1,34 @@
+# API and Web
+fastapi>=0.115.12
+uvicorn>=0.34.1
+python-multipart>=0.0.20
+pydantic>=2.11.3
+requests>=2.32.3
+
+# Database
+SQLAlchemy>=2.0.40
+psycopg2-binary>=2.9.10
+GeoAlchemy2>=0.7.2
+alembic>=1.15.2
+
+# ML and Data Processing
+torch>=2.6.0
+torchvision>=0.21.0
+numpy>=2.2.4
+scikit-image>=0.25.2
+scikit-learn>=1.6.1
+matplotlib>=3.10.1
+seaborn>=0.13.2
+rasterio>=1.4.3
+gdal>=3.6.2 #conda install -c conda-forge gdal
+opencv-python>=4.11.0.86
+geopandas>=1.0.1
+shapely>=2.1.0
+
+# Async processing
+celery>=5.5.1
+redis>=5.2.1
+
+# Testing
+pytest>=8.3.5
+httpx>=0.28.1
