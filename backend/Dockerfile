@@ -1,20 +1,14 @@
-FROM python:3.12-slim
+FROM continuumio/miniconda3
 
 WORKDIR /app
 
-# Install GDAL and other geospatial dependencies
-RUN apt-get update && apt-get install -y \
-    libgdal-dev \
-    gdal-bin \
-    python3-gdal \
-    && apt-get clean \
-    && rm -rf /var/lib/apt/lists/*
+# Create conda env and install dependencies
+COPY environment.yml .
+RUN conda env create -f environment.yml
+RUN echo "source activate myenv" > ~/.bashrc
+ENV PATH /opt/conda/envs/myenv/bin:$PATH
 
-# Install Python dependencies
-COPY requirements.txt .
-RUN pip install --no-cache-dir -r requirements.txt
-
-# Copy application code
+# Copy app
 COPY . .
 
-# Command is specified in docker-compose.yml
+CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000", "--reload"]
