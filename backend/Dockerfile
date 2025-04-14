@@ -6,7 +6,7 @@ WORKDIR /app
 RUN apt-get update && apt-get install -y \
     libgdal-dev \
     gdal-bin \
-    libspatialindex-dev \
+    python3-gdal \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
