@@ -1,6 +1,7 @@
 name: AtlasConda
 channels:
   - conda-forge
+  - main
 dependencies: 
   - python>=3.12
   - anaconda
