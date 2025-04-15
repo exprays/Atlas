@@ -28,7 +28,7 @@ services:
       dockerfile: Dockerfile
     volumes:
       - ./backend:/app
-      - ./data:/app/data
+      - ./backend:/data
     environment:
       - POSTGRES_SERVER=postgres
       - POSTGRES_USER=postgres
@@ -44,6 +44,13 @@ services:
       - postgres
       - redis
     command: uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
+    # deploy:
+    #   resources:
+    #     reservations:
+    #       devices:
+    #         - driver: nvidia
+    #           count: 1
+    #           capabilities: [gpu]
 
   celery_worker:
     build:
@@ -51,7 +58,7 @@ services:
       dockerfile: Dockerfile
     volumes:
       - ./backend:/app
-      - ./data:/app/data
+      - ./backend:/data
     environment:
       - POSTGRES_SERVER=postgres
       - POSTGRES_USER=postgres
