@@ -19,11 +19,11 @@ scikit-image>=0.25.2
 scikit-learn>=1.6.1
 matplotlib>=3.10.1
 seaborn>=0.13.2
-rasterio>=1.4.3
-gdal>=3.10 #conda install -c conda-forge gdal
+rasterio>=1.4.3  # Contains necessary GDAL bindings
 opencv-python>=4.11.0.86
 geopandas>=1.0.1
 shapely>=2.1.0
+pyproj>=3.6.0  # For projection transformations
 
 # Async processing
 celery>=5.5.1

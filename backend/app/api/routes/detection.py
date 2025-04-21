@@ -4,6 +4,7 @@ import tempfile
 import os
 import shutil
 from uuid import uuid4
+import json
 
 from app.ml.inferencer.predictor import ChangeDetectionPredictor
 from app.core.config import settings

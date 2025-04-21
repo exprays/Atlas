@@ -1,17 +1,24 @@
-FROM continuumio/miniconda3
+FROM python:3.11-slim
 
 WORKDIR /app
 
-# Copy requirements first so they're available during env creation
+# Install system dependencies for geospatial libraries
+RUN apt-get update && apt-get install -y \
+    build-essential \
+    libproj-dev \
+    libgeos-dev \
+    proj-bin \
+    libspatialindex-dev \
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/*
+
+# Copy requirements file
 COPY requirements.txt .
-COPY environment.yml .
 
-# Create conda environment
-RUN conda env create -f environment.yml
-ENV PATH /opt/conda/envs/myenv/bin:$PATH
-RUN echo "source activate myenv" > ~/.bashrc
+# Install Python dependencies
+RUN pip install --no-cache-dir -r requirements.txt
 
-# Copy the rest of the code
+# Copy application code
 COPY . .
 
-CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000", "--reload"]
+# Command is specified in docker-compose.yml

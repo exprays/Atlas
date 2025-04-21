@@ -213,7 +213,7 @@ class ChangeDetectionPredictor:
         Returns:
             Path to the saved visualization image
         """
-        # Open the images
+        # Open the images with rasterio
         with rasterio.open(before_image_path) as src:
             before_img = src.read([1, 2, 3])  # RGB channels
             before_img = np.transpose(before_img, (1, 2, 0))  # (H, W, C)
