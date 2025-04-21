@@ -1,4 +1,3 @@
-
 import numpy as np
 import torch
 import cv2
@@ -66,13 +65,16 @@ class SatelliteImageAugmentation:
             before = cv2.convertScaleAbs(before, alpha=alpha, beta=beta)
             after = cv2.convertScaleAbs(after, alpha=alpha, beta=beta)
         
-        # Random noise
+        # Random noise - FIXED
         if random.random() < self.noise_probability:
-            # Gaussian noise
-            noise = np.random.normal(0, 15, before.shape).astype(np.uint8)
-            before = cv2.add(before, noise)
+            # Use appropriate noise scale for normalized images
+            noise_scale = 0.05  # 5% of the normalized range
             
-            noise = np.random.normal(0, 15, after.shape).astype(np.uint8)
-            after = cv2.add(after, noise)
+            # Generate noise with matching data type
+            noise = np.random.normal(0, noise_scale, before.shape).astype(before.dtype)
+            before = before + noise  # Use numpy addition instead of cv2.add
+            
+            noise = np.random.normal(0, noise_scale, after.shape).astype(after.dtype)
+            after = after + noise  # Use numpy addition instead of cv2.add
         
         return before, after, mask_out
