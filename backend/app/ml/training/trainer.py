@@ -88,10 +88,10 @@ class SatelliteChangeDataset(Dataset):
             # Apply the same transformations to all images
             before_np, after_np, mask_np = self.transform.apply(before_np, after_np, mask_np)
             
-            # Convert back to tensors
-            before_tensor = torch.from_numpy(before_np.transpose(2, 0, 1)).float()
-            after_tensor = torch.from_numpy(after_np.transpose(2, 0, 1)).float()
-            mask_tensor = torch.from_numpy(mask_np.transpose(2, 0, 1)).float()
+            # Convert back to tensors - with .copy() to fix the negative strides issue
+            before_tensor = torch.from_numpy(before_np.transpose(2, 0, 1).copy()).float()
+            after_tensor = torch.from_numpy(after_np.transpose(2, 0, 1).copy()).float()
+            mask_tensor = torch.from_numpy(mask_np.transpose(2, 0, 1).copy()).float()
         
         # Combine before and after tensors
         combined_tensor = torch.cat([before_tensor, after_tensor], dim=0)
