@@ -21,7 +21,7 @@ class DoubleConv(nn.Module):
             nn.Conv2d(in_channels, out_channels, kernel_size=3, padding=1),
             nn.BatchNorm2d(out_channels),
             nn.ReLU(inplace=True),
-            nn.Conv2d(out_channels, out_channels, kernel_size=3, padding=1),
+            nn.Conv2d(out_channels, out_channels, kernel_size=3, padding=1), # 3 x 3 kernel for convolution operation with padding 1 and stride 1
             nn.BatchNorm2d(out_channels),
             nn.ReLU(inplace=True)
         )
@@ -37,7 +37,7 @@ class Down(nn.Module):
         super(Down, self).__init__()
         self.maxpool_conv = nn.Sequential(
             nn.MaxPool2d(2),
-            DoubleConv(in_channels, out_channels)
+            DoubleConv(in_channels, out_channels) #  Max-pooling layer operation
         )
 
     def forward(self, x):
@@ -86,6 +86,7 @@ class OutConv(nn.Module):
 class UNet(nn.Module):
     """
     Full U-Net architecture for change detection
+    Siamese U-Net
     """
     def __init__(self, n_channels=6, n_classes=1, bilinear=True):
         """
@@ -154,6 +155,6 @@ def initialize_model(n_channels=6, n_classes=1, pretrained_path=None):
     if pretrained_path and torch.cuda.is_available():
         model.load_state_dict(torch.load(pretrained_path))
     elif pretrained_path:
-        model.load_state_dict(torch.load(pretrained_path, map_location=torch.device('cpu')))
+        model.load_state_dict(torch.load(pretrained_path, map_location=torch.device('cpu'))) # use cuda for GPU Acceleration
     
     return model
