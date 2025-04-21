@@ -8,9 +8,9 @@ interface ChangeDetectionResultsProps {
   jobId: string;
   changePercentage: number;
   numRegions: number;
-  accuracy?: number;
-  kappa?: number;
-  fiError?: number;
+  accuracy?: number | null;
+  kappa?: number | null;
+  fiError?: number | null;
   visualizationUrl: string;
   geojsonUrl: string;
 }
@@ -25,7 +25,7 @@ const ChangeDetectionResults: React.FC<ChangeDetectionResultsProps> = ({
   visualizationUrl,
   geojsonUrl
 }) => {
-  // Prepare data for metrics chart
+  // Prepare data for metrics chart - filter out null/undefined values
   const metricsData = [
     { name: 'Accuracy', value: accuracy || 0 },
     { name: 'Kappa', value: kappa || 0 },
@@ -40,12 +40,12 @@ const ChangeDetectionResults: React.FC<ChangeDetectionResultsProps> = ({
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
         <div className="bg-blue-50 p-4 rounded-lg">
           <h3 className="text-lg font-semibold text-blue-800">Change Percentage</h3>
-          <p className="text-3xl font-bold">{changePercentage.toFixed(2)}%</p>
+          <p className="text-3xl font-bold">{changePercentage?.toFixed(2) ?? '0.00'}%</p>
         </div>
         
         <div className="bg-green-50 p-4 rounded-lg">
           <h3 className="text-lg font-semibold text-green-800">Change Regions</h3>
-          <p className="text-3xl font-bold">{numRegions}</p>
+          <p className="text-3xl font-bold">{numRegions ?? 0}</p>
         </div>
         
         <div className="bg-purple-50 p-4 rounded-lg">
@@ -54,15 +54,15 @@ const ChangeDetectionResults: React.FC<ChangeDetectionResultsProps> = ({
         </div>
       </div>
 
-      {/* Accuracy Metrics Cards */}
-      {(accuracy !== undefined || kappa !== undefined || fiError !== undefined) && (
+      {/* Accuracy Metrics Cards - only show if we have metrics data */}
+      {(accuracy != null || kappa != null || fiError != null) && (
         <div className="mb-6">
           <h3 className="text-xl font-bold mb-3">
             Accuracy Metrics
             <InfoTooltip text="These metrics evaluate how well the change detection algorithm performed compared to expected outcomes." />
           </h3>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            {accuracy !== undefined && (
+            {accuracy != null && (
               <div className="bg-green-50 p-4 rounded-lg">
                 <h3 className="text-lg font-semibold text-green-800">Overall Accuracy</h3>
                 <p className="text-3xl font-bold">{(accuracy * 100).toFixed(2)}%</p>
@@ -70,7 +70,7 @@ const ChangeDetectionResults: React.FC<ChangeDetectionResultsProps> = ({
               </div>
             )}
             
-            {kappa !== undefined && (
+            {kappa != null && (
               <div className="bg-blue-50 p-4 rounded-lg">
                 <h3 className="text-lg font-semibold text-blue-800">Kappa Coefficient</h3>
                 <p className="text-3xl font-bold">{kappa.toFixed(4)}</p>
@@ -78,7 +78,7 @@ const ChangeDetectionResults: React.FC<ChangeDetectionResultsProps> = ({
               </div>
             )}
             
-            {fiError !== undefined && (
+            {fiError != null && (
               <div className="bg-amber-50 p-4 rounded-lg">
                 <h3 className="text-lg font-semibold text-amber-800">FI Error</h3>
                 <p className="text-3xl font-bold">{(fiError * 100).toFixed(2)}%</p>
@@ -113,7 +113,7 @@ const ChangeDetectionResults: React.FC<ChangeDetectionResultsProps> = ({
         </div>
       </div>
       
-      {/* Metrics Chart */}
+      {/* Metrics Chart - only show if we have metrics */}
       {metricsData.length > 0 && (
         <div className="mt-8 bg-white p-6 rounded-lg shadow-md">
           <h3 className="text-xl font-bold mb-3">Accuracy Metrics Comparison</h3>
@@ -141,8 +141,9 @@ const ChangeDetectionResults: React.FC<ChangeDetectionResultsProps> = ({
                   radius={[4, 4, 0, 0]}
                   label={{ 
                     position: 'top', 
+   
                     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                    formatter: (value: any) => `${(Number(value) * 100).toFixed(1)}%` 
+                    formatter: (value: any) => value ? `${(Number(value) * 100).toFixed(1)}%` : '0%'
                   }}
                 />
               </BarChart>
