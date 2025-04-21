@@ -4,7 +4,7 @@
 # Made with ❤️ by exprays
 
 import os
-from pydantic import BaseSettings
+from pydantic_settings import BaseSettings
 from typing import Optional, List
 
 class Settings(BaseSettings):
