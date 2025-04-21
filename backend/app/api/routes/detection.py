@@ -84,6 +84,12 @@ def process_images_task(job_id, before_path, after_path, output_dir):
         # Process the image pair
         result = predictor.process_image_pair(before_path, after_path, output_dir)
         
+        # Save metrics to a file if they're available in the analysis
+        if "metrics" in result:
+            metrics_path = os.path.join(output_dir, "evaluation_metrics.json")
+            with open(metrics_path, 'w') as f:
+                json.dump(result["metrics"], f)
+        
         # Update database with results
         # ... implement database updates
         
@@ -120,13 +126,32 @@ async def get_results(job_id: str = Path(...), db = Depends(get_db)):
     with open(geojson_path, 'r') as f:
         geojson_data = json.load(f)
     
+    # Check if evaluation metrics are available
+    metrics_path = os.path.join(job_dir, "evaluation_metrics.json")
+    accuracy = None
+    kappa = None
+    fi_error = None
+    
+    if os.path.exists(metrics_path):
+        try:
+            with open(metrics_path, 'r') as f:
+                metrics_data = json.load(f)
+                accuracy = metrics_data.get('accuracy')
+                kappa = metrics_data.get('kappa')
+                fi_error = metrics_data.get('fi_error')
+        except Exception as e:
+            print(f"Error loading metrics: {e}")
+    
     return {
         "job_id": job_id,
         "status": "completed",
         "visualization_url": f"/api/v1/detection/visualization/{job_id}",
         "geojson_url": f"/api/v1/detection/geojson/{job_id}",
         "change_percentage": geojson_data["properties"]["change_percentage"],
-        "num_regions": geojson_data["properties"]["num_change_regions"]
+        "num_regions": geojson_data["properties"]["num_change_regions"],
+        "accuracy": accuracy,
+        "kappa": kappa,
+        "fi_error": fi_error
     }
 
 @router.get("/visualization/{job_id}")
