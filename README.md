@@ -1,5 +1,5 @@
 
-# AtlasEye Project Documentation
+# Atlas Documentation
 
 ## Table of Contents
 
@@ -54,52 +54,41 @@ cd atlaseye
 mkdir -p data/models data/images data/training/before data/training/after data/training/mask data/test_data
 ```
 
-### Fix Configuration Files
+### Check Configuration Files
 
-**1. PostCSS Configuration**
-
-```bash
-cat > frontend/postcss.config.mjs << EOL
-export default {
-  plugins: {
-    tailwindcss: {},
-    autoprefixer: {},
-  },
-};
-EOL
-```
-
-**2. Backend Dockerfile**
+**1. Backend Dockerfile**
 
 ```bash
-cat > backend/Dockerfile << EOL
-FROM python:3.9-slim
+FROM python:3.11-slim
 
 WORKDIR /app
 
-# Install GDAL and other geospatial dependencies
+# Install system dependencies for geospatial libraries
 RUN apt-get update && apt-get install -y \
-    libgdal-dev \
-    gdal-bin \
+    build-essential \
+    libproj-dev \
+    libgeos-dev \
+    proj-bin \
     libspatialindex-dev \
+    libgl1-mesa-glx \
+    libglib2.0-0 \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
-# Install Python dependencies
+# Copy requirements file
 COPY requirements.txt .
+
+# Install Python dependencies
 RUN pip install --no-cache-dir -r requirements.txt
 
 # Copy application code
 COPY . .
 
-# Command is specified in docker-compose.yml
-EOL
 ```
 
-**3. Frontend Dockerfile**
+**2. Frontend Dockerfile**
 
 ```bash
-cat > frontend/Dockerfile << EOL
 FROM node:18-alpine
 
 WORKDIR /app
@@ -110,9 +99,6 @@ RUN npm install
 
 # Copy the rest of the application
 COPY . .
-
-# Command is specified in docker-compose.yml
-EOL
 ```
 
 ### Prepare Training Data
@@ -161,13 +147,13 @@ The system uses environment variables for configuration:
 ### Starting Training Process
 
 ```bash
-docker-compose run --rm backend python -m app.ml.training.train \
-    --data_dir=/app/data/training \
-    --checkpoint_dir=/app/data/models \
-    --batch_size=8 \
-    --num_epochs=50 \
-    --learning_rate=0.001 \
-    --image_size=256 \
+docker-compose run --rm backend python -m app.ml.training.train 
+    --data_dir=/app/data/training 
+    --checkpoint_dir=/app/data/models 
+    --batch_size=8 
+    --num_epochs=50 
+    --learning_rate=0.001 
+    --image_size=256 
     --device=cpu  # Use 'cuda' if GPU available
 ```
 
@@ -216,11 +202,11 @@ docker-compose run --rm backend python -m unittest backend/tests/test_api.py
 ### Testing ML Model Inference
 
 ```bash
-docker-compose run --rm backend python -m app.ml.inferencer.test_predictor \
-    --model_path=/app/data/models/final_model.pth \
-    --before=/app/data/test_data/before.tif \
-    --after=/app/data/test_data/after.tif \
-    --ground_truth=/app/data/test_data/mask.tif \  # Optional
+docker-compose run --rm backend python -m app.ml.inferencer.test_predictor 
+    --model_path=/app/data/models/final_model.pth 
+    --before=/app/data/test_data/before.tif 
+    --after=/app/data/test_data/after.tif 
+    --ground_truth=/app/data/test_data/mask.tif  # Optional
     --output_dir=/app/data/test_results
 ```
 
@@ -272,8 +258,8 @@ docker-compose logs -f backend
 ### 1. Upload Images
 
 ```bash
-curl -X POST http://localhost:8000/api/v1/detection/upload-images/ \
-  -F "before_image=@/path/to/before.tif" \
+curl -X POST http://localhost:8000/api/v1/detection/upload-images/ 
+  -F "before_image=@/path/to/before.tif" 
   -F "after_image=@/path/to/after.tif"
 ```
 
