@@ -36,7 +36,7 @@ services:
       - POSTGRES_DB=satellite_change
       - CELERY_BROKER_URL=redis://redis:6379/0
       - CELERY_RESULT_BACKEND=redis://redis:6379/0
-      - MODEL_PATH=/app/data/models/unet_model.pth
+      - MODEL_PATH=/app/data/models/final_model.pth
       - LOCAL_STORAGE_PATH=/app/data/images
     ports:
       - "8000:8000"
@@ -67,7 +67,7 @@ services:
       - POSTGRES_DB=satellite_change
       - CELERY_BROKER_URL=redis://redis:6379/0
       - CELERY_RESULT_BACKEND=redis://redis:6379/0
-      - MODEL_PATH=/app/data/models/unet_model.pth
+      - MODEL_PATH=/app/data/models/final_model.pth
       - LOCAL_STORAGE_PATH=/app/data/images
     depends_on:
       - postgres
@@ -85,10 +85,16 @@ services:
       - "3000:3000"
     environment:
       - NEXT_PUBLIC_API_URL=http://localhost:8000/api/v1
-      - NEXT_PUBLIC_MAPBOX_TOKEN=your_mapbox_token_here
+      - NEXT_PUBLIC_MAPBOX_TOKEN=pk.eyJ1IjoiZXhwcmF5cyIsImEiOiJjbTlyNnN6b2cxbG5oMmtzOTc2djhwd2ZtIn0.qS5UlpWSBvqrC19xXURR8A
     depends_on:
       - backend
     command: npm run dev
+    networks:
+      - app-network
 
 volumes:
   postgres_data:
+
+networks:
+  app-network:
+    driver: bridge
