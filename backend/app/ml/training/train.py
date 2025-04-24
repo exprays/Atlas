@@ -38,17 +38,28 @@ def parse_args():
 def plot_training_history(history, output_path='training_history.png'):
     """Plot training and validation loss history"""
     plt.figure(figsize=(10, 5))
-    plt.plot(history['train_losses'], label='Training Loss')
     
-    if history['val_losses']:
-        plt.plot(history['val_losses'], label='Validation Loss')
+    # Check if training losses exist and are not empty
+    if 'train_losses' in history and history['train_losses'] and len(history['train_losses']) > 0:
+        plt.plot(history['train_losses'], 'b-o', label='Training Loss', linewidth=2)
+        logger.info(f"Plotting training loss with {len(history['train_losses'])} points")
+    else:
+        logger.warning("No training loss data available for plotting")
+    
+    # Check if validation losses exist and are not empty
+    if 'val_losses' in history and history['val_losses'] and len(history['val_losses']) > 0:
+        plt.plot(history['val_losses'], 'r-^', label='Validation Loss', linewidth=2)
+        logger.info(f"Plotting validation loss with {len(history['val_losses'])} points")
     
     plt.xlabel('Epoch')
     plt.ylabel('Loss')
     plt.title('Training History')
     plt.legend()
     plt.grid(True)
-    plt.savefig(output_path)
+    
+    # Save with high DPI for clarity
+    plt.savefig(output_path, dpi=300)
+    plt.close()  # Close the figure to free memory
     logger.info(f"Training history plot saved to {output_path}")
 
 def find_data_files(data_dir):

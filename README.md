@@ -1,5 +1,5 @@
 
-# AtlasEye Project Documentation
+# Atlas Documentation
 
 ## Table of Contents
 
@@ -31,6 +31,19 @@ AtlasEye is a satellite change detection system that uses deep learning to ident
 - **Frontend**: Next.js, TypeScript, TailwindCSS, Mapbox GL
 - **Infrastructure**: Docker, Celery, Redis
 
+[![Postgres](https://img.shields.io/badge/postgres-%23316192.svg?style=for-the-badge&logo=postgresql&logoColor=white)](https://img.shields.io/badge/postgres-%23316192.svg?style=for-the-badge&logo=postgresql&logoColor=white)
+[![Redis](https://img.shields.io/badge/redis-%23DD0031.svg?style=for-the-badge&logo=redis&logoColor=white)](https://img.shields.io/badge/redis-%23DD0031.svg?style=for-the-badge&logo=redis&logoColor=white)
+[![Celery](https://img.shields.io/badge/celery-%23a9cc54.svg?style=for-the-badge&logo=celery&logoColor=ddf4a4)](https://img.shields.io/badge/celery-%23a9cc54.svg?style=for-the-badge&logo=celery&logoColor=ddf4a4)
+[![FastAPI](https://img.shields.io/badge/FastAPI-005571?style=for-the-badge&logo=fastapi)](https://img.shields.io/badge/FastAPI-005571?style=for-the-badge&logo=fastapi)
+[![Next JS](https://img.shields.io/badge/Next-black?style=for-the-badge&logo=next.js&logoColor=white)](https://img.shields.io/badge/Next-black?style=for-the-badge&logo=next.js&logoColor=white)
+[![React](https://img.shields.io/badge/react-%2320232a.svg?style=for-the-badge&logo=react&logoColor=%2361DAFB)](https://img.shields.io/badge/react-%2320232a.svg?style=for-the-badge&logo=react&logoColor=%2361DAFB)
+[![TailwindCSS](https://img.shields.io/badge/tailwindcss-%2338B2AC.svg?style=for-the-badge&logo=tailwind-css&logoColor=white)](https://img.shields.io/badge/tailwindcss-%2338B2AC.svg?style=for-the-badge&logo=tailwind-css&logoColor=white)
+[![scikit-learn](https://img.shields.io/badge/scikit--learn-%23F7931E.svg?style=for-the-badge&logo=scikit-learn&logoColor=white)](https://img.shields.io/badge/scikit--learn-%23F7931E.svg?style=for-the-badge&logo=scikit-learn&logoColor=white)
+[![PyTorch](https://img.shields.io/badge/PyTorch-%23EE4C2C.svg?style=for-the-badge&logo=PyTorch&logoColor=white)](https://img.shields.io/badge/PyTorch-%23EE4C2C.svg?style=for-the-badge&logo=PyTorch&logoColor=white)
+[![NumPy](https://img.shields.io/badge/numpy-%23013243.svg?style=for-the-badge&logo=numpy&logoColor=white)](https://img.shields.io/badge/numpy-%23013243.svg?style=for-the-badge&logo=numpy&logoColor=white)
+[![Matplotlib](https://img.shields.io/badge/Matplotlib-%23ffffff.svg?style=for-the-badge&logo=Matplotlib&logoColor=black)](https://img.shields.io/badge/Matplotlib-%23ffffff.svg?style=for-the-badge&logo=Matplotlib&logoColor=black)
+[![Docker](https://img.shields.io/badge/docker-%230db7ed.svg?style=for-the-badge&logo=docker&logoColor=white)](https://img.shields.io/badge/docker-%230db7ed.svg?style=for-the-badge&logo=docker&logoColor=white)
+
 ## System Requirements
 
 - Docker and Docker Compose
@@ -54,52 +67,41 @@ cd atlaseye
 mkdir -p data/models data/images data/training/before data/training/after data/training/mask data/test_data
 ```
 
-### Fix Configuration Files
+### Check Configuration Files
 
-**1. PostCSS Configuration**
-
-```bash
-cat > frontend/postcss.config.mjs << EOL
-export default {
-  plugins: {
-    tailwindcss: {},
-    autoprefixer: {},
-  },
-};
-EOL
-```
-
-**2. Backend Dockerfile**
+**1. Backend Dockerfile**
 
 ```bash
-cat > backend/Dockerfile << EOL
-FROM python:3.9-slim
+FROM python:3.11-slim
 
 WORKDIR /app
 
-# Install GDAL and other geospatial dependencies
+# Install system dependencies for geospatial libraries
 RUN apt-get update && apt-get install -y \
-    libgdal-dev \
-    gdal-bin \
+    build-essential \
+    libproj-dev \
+    libgeos-dev \
+    proj-bin \
     libspatialindex-dev \
+    libgl1-mesa-glx \
+    libglib2.0-0 \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
-# Install Python dependencies
+# Copy requirements file
 COPY requirements.txt .
+
+# Install Python dependencies
 RUN pip install --no-cache-dir -r requirements.txt
 
 # Copy application code
 COPY . .
 
-# Command is specified in docker-compose.yml
-EOL
 ```
 
-**3. Frontend Dockerfile**
+**2. Frontend Dockerfile**
 
 ```bash
-cat > frontend/Dockerfile << EOL
 FROM node:18-alpine
 
 WORKDIR /app
@@ -110,9 +112,6 @@ RUN npm install
 
 # Copy the rest of the application
 COPY . .
-
-# Command is specified in docker-compose.yml
-EOL
 ```
 
 ### Prepare Training Data
@@ -161,6 +160,7 @@ The system uses environment variables for configuration:
 ### Starting Training Process
 
 ```bash
+<<<<<<< HEAD
 docker-compose run --rm backend python -m app.ml.training.train
     --data_dir=/app/data/training
     --checkpoint_dir=/app/data/models
@@ -168,6 +168,15 @@ docker-compose run --rm backend python -m app.ml.training.train
     --num_epochs=50
     --learning_rate=0.001
     --image_size=256
+=======
+docker-compose run --rm backend python -m app.ml.training.train 
+    --data_dir=/app/data/training 
+    --checkpoint_dir=/app/data/models 
+    --batch_size=8 
+    --num_epochs=50 
+    --learning_rate=0.001 
+    --image_size=256 
+>>>>>>> 23623dfdd587ac7e62bbc55b80a349de65f4efb4
     --device=cpu  # Use 'cuda' if GPU available
 ```
 
@@ -216,11 +225,11 @@ docker-compose run --rm backend python -m unittest backend/tests/test_api.py
 ### Testing ML Model Inference
 
 ```bash
-docker-compose run --rm backend python -m app.ml.inferencer.test_predictor \
-    --model_path=/app/data/models/final_model.pth \
-    --before=/app/data/test_data/before.tif \
-    --after=/app/data/test_data/after.tif \
-    --ground_truth=/app/data/test_data/mask.tif \  # Optional
+docker-compose run --rm backend python -m app.ml.inferencer.test_predictor 
+    --model_path=/app/data/models/final_model.pth 
+    --before=/app/data/test_data/before.tif 
+    --after=/app/data/test_data/after.tif 
+    --ground_truth=/app/data/test_data/mask.tif  # Optional
     --output_dir=/app/data/test_results
 ```
 
@@ -272,8 +281,8 @@ docker-compose logs -f backend
 ### 1. Upload Images
 
 ```bash
-curl -X POST http://localhost:8000/api/v1/detection/upload-images/ \
-  -F "before_image=@/path/to/before.tif" \
+curl -X POST http://localhost:8000/api/v1/detection/upload-images/ 
+  -F "before_image=@/path/to/before.tif" 
   -F "after_image=@/path/to/after.tif"
 ```
 
