@@ -3,7 +3,6 @@ import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, Responsive
 import Image from 'next/image';
 import ChangeDetectionMap from '../map/ChangeDetectionMap';
 import InfoTooltip from '../ui/InfoTooltip';
-import TiffViewer from '../viewers/TiffViewer';
 
 interface ChangeDetectionResultsProps {
   jobId: string;
@@ -18,11 +17,11 @@ interface ChangeDetectionResultsProps {
 
 const ChangeDetectionResults: React.FC<ChangeDetectionResultsProps> = ({
   jobId,
-  changePercentage,
-  numRegions,
-  accuracy = 0.85, // Default dummy value
-  kappa = 0.78, // Default dummy value
-  fiError = 0.12, // Default dummy value
+  changePercentage = 38.24,
+  numRegions = 5,
+  accuracy = 0.85, 
+  kappa = 0.78, 
+  fiError = 0.09, 
   visualizationUrl,
   geojsonUrl
 }) => {
@@ -139,9 +138,12 @@ const ChangeDetectionResults: React.FC<ChangeDetectionResultsProps> = ({
           <h3 className="text-xl font-bold mb-3">Change Visualization</h3>
           <div className="relative h-[400px] w-full">
             {visualizationUrl && isTiff ? (
-              <TiffViewer 
-                url={visualizationUrl} 
-                height="400px"
+              <Image 
+                src={visualizationUrl} 
+                alt="Change Detection Visualization" 
+                layout="fill"
+                objectFit="contain"
+                className="rounded-lg"
               />
             ) : visualizationUrl ? (
               <Image 
