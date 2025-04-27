@@ -160,6 +160,15 @@ The system uses environment variables for configuration:
 ### Starting Training Process
 
 ```bash
+<<<<<<< HEAD
+docker-compose run --rm backend python -m app.ml.training.train
+    --data_dir=/app/data/training
+    --checkpoint_dir=/app/data/models
+    --batch_size=8
+    --num_epochs=50
+    --learning_rate=0.001
+    --image_size=256
+=======
 docker-compose run --rm backend python -m app.ml.training.train 
     --data_dir=/app/data/training 
     --checkpoint_dir=/app/data/models 
@@ -167,6 +176,7 @@ docker-compose run --rm backend python -m app.ml.training.train
     --num_epochs=50 
     --learning_rate=0.001 
     --image_size=256 
+>>>>>>> 23623dfdd587ac7e62bbc55b80a349de65f4efb4
     --device=cpu  # Use 'cuda' if GPU available
 ```
 
