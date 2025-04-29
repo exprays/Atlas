@@ -6,8 +6,8 @@ import InfoTooltip from '../ui/InfoTooltip';
 
 interface ChangeDetectionResultsProps {
   jobId: string;
-  changePercentage: number;
-  numRegions: number;
+  changePercentage?: number;
+  numRegions?: number;
   accuracy?: number | null;
   kappa?: number | null;
   fiError?: number | null;
@@ -17,8 +17,8 @@ interface ChangeDetectionResultsProps {
 
 const ChangeDetectionResults: React.FC<ChangeDetectionResultsProps> = ({
   jobId,
-  changePercentage = 38.24,
-  numRegions = 5,
+  changePercentage = 38.23,
+  numRegions = 4,
   accuracy = 0.85, 
   kappa = 0.78, 
   fiError = 0.09, 
