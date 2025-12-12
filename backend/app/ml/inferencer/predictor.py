@@ -17,6 +17,7 @@ import json
 
 from app.ml.models.unet import initialize_model
 from app.ml.data.preprocessing import prepare_image_pair
+from app.ml.inferencer.evaluation import calculate_metrics
 from app.core.config import settings
 
 # Set up logging
@@ -345,7 +346,7 @@ class ChangeDetectionPredictor:
             raise
     
     def process_image_pair(self, before_image_path, after_image_path, output_dir, 
-                          min_area=10, target_size=(256, 256), export_geojson=True):
+                          min_area=10, target_size=(256, 256), export_geojson=True, ground_truth_path=None):
         """
         Complete processing pipeline for a pair of images
         
@@ -356,6 +357,7 @@ class ChangeDetectionPredictor:
             min_area: Minimum area for change regions
             target_size: Size to resize images to
             export_geojson: Whether to export results as GeoJSON
+            ground_truth_path: Optional path to ground truth mask for evaluation metrics
             
         Returns:
             Dictionary with all processing results and output paths
@@ -365,12 +367,38 @@ class ChangeDetectionPredictor:
         # Generate output paths
         viz_path = os.path.join(output_dir, 'change_visualization.png')
         geojson_path = os.path.join(output_dir, 'change_detection.geojson')
+        metrics_path = os.path.join(output_dir, 'evaluation_metrics.json')
         
         # Run prediction
         prediction_result = self.predict(before_image_path, after_image_path, target_size)
         
         # Analyze changes
         analysis_result = self.analyze_changes(prediction_result, min_area)
+        
+        # Calculate evaluation metrics if ground truth is provided
+        evaluation_metrics = None
+        if ground_truth_path and os.path.exists(ground_truth_path):
+            try:
+                # Load ground truth
+                with rasterio.open(ground_truth_path) as src:
+                    ground_truth = src.read(1).astype(np.uint8)
+                
+                # Resize ground truth to match prediction if needed
+                target_h, target_w = prediction_result['binary_mask'].shape
+                if ground_truth.shape[0] != target_h or ground_truth.shape[1] != target_w:
+                    ground_truth = cv2.resize(ground_truth, (target_w, target_h), interpolation=cv2.INTER_NEAREST)
+                
+                # Calculate metrics
+                evaluation_metrics = calculate_metrics(prediction_result['binary_mask'], ground_truth)
+                
+                # Save metrics to JSON
+                with open(metrics_path, 'w') as f:
+                    json.dump(evaluation_metrics, f, indent=2)
+                
+                logger.info(f"Evaluation metrics saved to {metrics_path}")
+            except Exception as e:
+                logger.warning(f"Could not calculate evaluation metrics: {str(e)}")
+                evaluation_metrics = None
         
         # Create visualization
         self.create_visualization(
@@ -388,5 +416,7 @@ class ChangeDetectionPredictor:
             'prediction': prediction_result,
             'analysis': analysis_result,
             'visualization_path': viz_path,
-            'geojson_path': geojson_path if export_geojson else None
+            'geojson_path': geojson_path if export_geojson else None,
+            'metrics': evaluation_metrics,
+            'metrics_path': metrics_path if evaluation_metrics else None
         }

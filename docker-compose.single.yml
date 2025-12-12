@@ -1,0 +1,105 @@
+version: '3.8'
+
+# Single Image Deployment for AtlasEye
+# All application services (backend, celery, frontend) use the same image
+# with different commands/entrypoints
+
+services:
+  postgres:
+    image: postgis/postgis:14-3.2
+    container_name: atlas-postgres
+    volumes:
+      - postgres_data:/var/lib/postgresql/data/
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_DB=satellite_change
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - atlas-network
+
+  redis:
+    image: redis:7-alpine
+    container_name: atlas-redis
+    ports:
+      - "6379:6379"
+    networks:
+      - atlas-network
+
+  backend:
+    image: atlas-app:latest
+    container_name: atlas-backend
+    command: ["backend"]
+    volumes:
+      - ./data:/app/data
+    environment:
+      - POSTGRES_SERVER=postgres
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_DB=satellite_change
+      - CELERY_BROKER_URL=redis://redis:6379/0
+      - CELERY_RESULT_BACKEND=redis://redis:6379/0
+      - MODEL_PATH=/app/data/models/final_model.pth
+      - LOCAL_STORAGE_PATH=/app/data/images
+    ports:
+      - "8000:8000"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_started
+    networks:
+      - atlas-network
+    restart: unless-stopped
+
+  celery_worker:
+    image: atlas-app:latest
+    container_name: atlas-celery-worker
+    command: ["celery"]
+    volumes:
+      - ./data:/app/data
+    environment:
+      - POSTGRES_SERVER=postgres
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_DB=satellite_change
+      - CELERY_BROKER_URL=redis://redis:6379/0
+      - CELERY_RESULT_BACKEND=redis://redis:6379/0
+      - MODEL_PATH=/app/data/models/final_model.pth
+      - LOCAL_STORAGE_PATH=/app/data/images
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_started
+    networks:
+      - atlas-network
+    restart: unless-stopped
+
+  frontend:
+    image: atlas-app:latest
+    container_name: atlas-frontend
+    command: ["frontend"]
+    ports:
+      - "3000:3000"
+    environment:
+      - NEXT_PUBLIC_API_URL=http://localhost:8000/api/v1
+      - NEXT_PUBLIC_MAPBOX_TOKEN=pk.eyJ1IjoiZXhwcmF5cyIsImEiOiJjbTlyNnN6b2cxbG5oMmtzOTc2djhwd2ZtIn0.qS5UlpWSBvqrC19xXURR8A
+    depends_on:
+      - backend
+    networks:
+      - atlas-network
+    restart: unless-stopped
+
+volumes:
+  postgres_data:
+
+networks:
+  atlas-network:
+    driver: bridge

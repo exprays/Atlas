@@ -87,7 +87,7 @@ export default function UploadForm() {
       // Step 3: Poll for results (optional - we can also just redirect)
       try {
         await pollForResults(jobId, 5); // Just try a few times quickly
-      } catch (e) {
+      } catch {
         // It's okay if polling times out, we'll redirect to results page anyway
       }
       
